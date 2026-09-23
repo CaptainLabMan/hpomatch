@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}{{ gene }} — PhenFind{% endblock %}
+
+{% block content %}
+<main class="container-fluid py-2 px-1 d-flex flex-column overflow-hidden" style="height: 92vh;">
+    <h2 class="flex-shrink-0">Gene: {{ gene }}</h2>
+
+    {% if not data or not data.diseases %}
+        <p>No disease data found for this gene.</p>
+    {% else %}
+        <div class="shadow-sm border rounded-4 bg-white border overflow-hidden d-flex flex-column flex-grow-1" style="min-height: 0;">
+            <div class="table-responsive overflow-auto flex-grow-1" style="min-height: 0;">
+                <table class="table table-bordered text-center align-middle mb-0">
+                <thead class="sticky-top table-light">
+                    <tr>
+                        <th scope="col">Symptom group</th>
+
+                        {% for disease_id, disease in data.diseases.items() %}
+                            <th scope="col" style="min-width: 250px;">
+                                {{ disease.name }}
+                                <div class="small">
+                                    {% set database, number = disease_id.split(':', 1) %}
+
+                                    {% if database == 'OMIM' %}
+                                        <a href="https://omim.org/entry/{{ number }}"
+                                        target="_blank"
+                                        rel="noopener noreferrer">
+                                            {{ disease_id }}
+                                        </a>
+
+                                    {% elif database == 'ORPHA' %}
+                                        <a href="https://www.orpha.net/en/disease/detail/{{ number }}?name={{ gene | urlencode }}&amp;mode=gene"
+                                        target="_blank"
+                                        rel="noopener noreferrer">
+                                            {{ disease_id }}
+                                        </a>
+
+                                    {% else %}
+                                        {{ disease_id }}
+                                    {% endif %}
+                                </div>
+                            </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <th scope="row">Inheritance</th>
+
+                        {% for disease in data.diseases.values() %}
+                            <td>
+                                {{ disease.inheritance
+                                   if disease.inheritance
+                                   and disease.inheritance != 'Нет данных'
+                                   else 'No data' }}
+                            </td>
+                        {% endfor %}
+                    </tr>
+
+                    {% for group_id, group_name in data.groups.items() %}
+                        <tr>
+                            <th scope="row">{{ group_name }}</th>
+
+                            {% for disease in data.diseases.values() %}
+                                {% set group = disease.groups.get(group_id) %}
+
+                                <td>
+                                    {% if group and group.terms %}
+                                        <ul class="text-start ps-3 mb-0">
+                                            {% for hpo_id, term in group.terms.items() %}
+                                                <li class="mb-1" title="{{ hpo_id }}">
+                                                    {% if term.excluded %}
+                                                        <strong>Not observed:</strong>
+                                                    {% endif %}
+
+                                                    {{ term.name }}{% if term.frequency %} ({{ term.frequency }}){% endif %}
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</main>
+{% endblock %}

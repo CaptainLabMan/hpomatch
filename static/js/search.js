@@ -194,6 +194,19 @@ async function updateMatches() {
             })
         );
         $("#gene-match-summary").html(data.summary_html);
+        $("#gene-match-summary tbody tr").each(function () {
+            const cell = $(this).children("td").first();
+            const gene = cell.text().trim();
+
+            cell.empty().append(
+                $("<a>", {
+                    href: `/gene?gene=${encodeURIComponent(gene)}`,
+                    text: gene,
+                    target: "_blank",
+                    rel: "noopener noreferrer"
+                })
+            );
+        });
         $("#genes-match-stats").html(data.stats_html);
 
     } catch (error) {

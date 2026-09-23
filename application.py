@@ -2,7 +2,7 @@ from pathlib import Path
 import json
 import pandas as pd
 
-from fastapi import FastAPI, Request, Body, Query
+from fastapi import FastAPI, Request, Body, Query, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -17,6 +17,9 @@ from hpo import (
 # Resolve paths relative to this file.
 BASE_DIR = Path(__file__).resolve().parent
 
+# ==================================================================================================================================
+
+# ==================================================================================================================================
 matrix = pd.read_pickle(
     BASE_DIR / "static/data/genes_x_phenotypes_matrix.pkl"
 )
@@ -27,7 +30,42 @@ phenotype_names = pd.read_csv(
     usecols=["hpo_id", "hpo_name"],
 ).drop_duplicates("hpo_id")
 
+# ==================================================================================================================================
 
+# ==================================================================================================================================
+with (BASE_DIR / "static/data/gene_phenotypes.json").open(
+    encoding="utf-8"
+) as file:
+    gene_phenotypes = json.load(file)
+
+# Match case-insensitively while preserving symbols such as C9orf72.
+gene_symbols = {gene.upper(): gene for gene in gene_phenotypes}
+
+
+def get_gene_data(gene: str):
+    gene = gene_symbols.get(gene.strip().upper())
+
+    if gene is None:
+        return None
+
+    diseases = gene_phenotypes[gene]["diseases"]
+
+    # Collect all symptom groups across the gene's diseases.
+    groups = {
+        group_id: group["name"]
+        for disease in diseases.values()
+        for group_id, group in disease["groups"].items()
+    }
+
+    return {
+        "gene": gene,
+        "diseases": diseases,
+        "groups": dict(sorted(groups.items(), key=lambda item: item[1])),
+    }
+
+# ==================================================================================================================================
+
+# ==================================================================================================================================
 app = FastAPI(title="PhenFind")
 
 # Serve CSS, JavaScript, and images.
@@ -87,3 +125,28 @@ def get_matches(
             "genes": "Genes",
         }).to_html(**table_options),
     }
+
+
+@app.get("/api/genes/{gene}")
+def gene_api(gene: str):
+    data = get_gene_data(gene)
+
+    if data is None:
+        raise HTTPException(status_code=404, detail="Gene not found")
+
+    return data
+
+
+@app.get("/gene", response_class=HTMLResponse)
+def gene_page(request: Request, gene: str):
+    data = get_gene_data(gene)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="gene.html",
+        context={
+            "gene": data["gene"] if data else gene.strip().upper(),
+            "data": data,
+        },
+        status_code=404 if data is None else 200,
+    )
