@@ -8,37 +8,38 @@
             <div class="row h-50">
 
                 <div class="col-4 p-1 h-100">
-                    <div class="bg-white shadow-sm border rounded-4 h-100 p-1 d-flex flex-column">
+                    <div class="bg-white shadow-sm border rounded-4 h-100 p-1 d-flex flex-column" style="--bs-bg-opacity: 0.9;">
                         <input
                             id="search-input"
-                            class="form-control rounded-4 p-2 border border-success-subtle bg-success bg-opacity-10 focus-ring focus-ring-success"
+                            class="form-control bg-success rounded-4 p-2 border border-success focus-ring focus-ring-success"
+                            style="--bs-bg-opacity: 0.1;"
                             type="search"
                             placeholder="Search terms"
                             aria-label="Search terms"
                         >
 
-                        <div class="d-flex flex-wrap align-items-center gap-3 flex-shrink-0 py-1">
+                        <div class="d-flex flex-nowrap align-items-center gap-2 flex-shrink-0 py-1">
                             <div class="form-check form-switch d-flex align-items-center gap-2 ps-0 mb-0">
                                 <input
-                                    class="form-check-input fs-3 m-0 flex-shrink-0 border-success-subtle"
+                                    class="form-check-input fs-3 m-0 flex-shrink-0 border border-success"
                                     type="checkbox"
                                     role="switch"
                                     id="exact-match"
                                 >
 
-                                <label class="form-check-label" for="exact-match">
+                                <label class="form-check-label small" for="exact-match">
                                     Exact match
                                 </label>
                             </div>
 
-                            <div class="d-flex align-items-center gap-2 ms-auto">
-                                <label class="text-nowrap" for="min-matches">
+                            <div class="d-flex align-items-center gap-1 ms-auto">
+                                <label class="small mb-0" for="min-matches">
                                     Min matches
                                 </label>
 
                                 <input
                                     id="min-matches"
-                                    class="form-control form-control-sm rounded-4 border-success-subtle focus-ring focus-ring-success"
+                                    class="form-control form-control-sm text-center rounded-4 focus-ring focus-ring-success border border-success"
                                     style="width: 65px;"
                                     type="number"
                                     min="1"
@@ -58,7 +59,7 @@
 
                 <div class="col-8 p-1 h-100">
                     <div id="matching-genes"
-                         class="bg-white shadow-sm border rounded-4 h-100 p-2 overflow-auto">
+                         class="bg-white shadow-sm border rounded-4 h-100 p-2 overflow-auto" style="--bs-bg-opacity: 0.9;">
                     </div>
                 </div>
 
@@ -66,14 +67,14 @@
 
             <div class="row h-50">
                 <div class="col-12 p-1 h-100">
-                    <div id="genes-match-stats" class="bg-white shadow-sm border rounded-4 h-100 p-2 overflow-auto">
+                    <div id="genes-match-stats" class="bg-white shadow-sm border rounded-4 h-100 p-2 overflow-auto" style="--bs-bg-opacity: 0.9;">
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="col-4 p-1 h-100">
-            <div id="gene-match-summary" class="bg-white shadow-sm border rounded-4 h-100 p-2 overflow-auto"></div>
+            <div id="gene-match-summary" class="bg-white shadow-sm border rounded-4 h-100 p-2 overflow-auto" style="--bs-bg-opacity: 0.9;">
             </div>
         </div>
     </div>

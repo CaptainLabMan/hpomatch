@@ -3,3 +3,4 @@ __pycache__/
 data/.DS_Store
 static/.DS_Store
 .venv/
+/static/data/gene_phenotypes.json

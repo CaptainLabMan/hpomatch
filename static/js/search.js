@@ -11,7 +11,7 @@ function addTerm(term) {
     selectedTerms.set(term.hpo_id, term.hpo_name);
 
     const tag = $("<span>", {
-        class: "badge text-bg-secondary d-inline-flex align-items-center m-1",
+        class: "badge bg-success-subtle text-success d-inline-flex align-items-center m-1",
         title: term.hpo_id
     });
 
@@ -22,7 +22,7 @@ function addTerm(term) {
 
     $("<button>", {
         type: "button",
-        class: "btn-close btn-close-white ms-2",
+        class: "btn-close btn-close-success ms-2",
         "aria-label": `Remove ${term.hpo_name}`
     }).on("click", function () {
         selectedTerms.delete(term.hpo_id);
@@ -92,7 +92,7 @@ async function initTermSearch() {
             class: "list-unstyled position-absolute w-100 shadow mt-1 bg-white rounded-3",
             element: list => {
                 list.style.cssText =
-                    "max-height: 250px; overflow-y: auto; z-index: 1050;";
+                    "max-height: 38vh; overflow-y: auto; z-index: 1050;";
             }
         },
 
@@ -114,7 +114,7 @@ async function initTermSearch() {
                 }
 
                 const mark = document.createElement("mark");
-                mark.className = "bg-warning p-0";
+                mark.className = "bg-success-subtle text-success p-0";
                 mark.textContent = text.slice(position, position + query.length);
 
                 item.append(

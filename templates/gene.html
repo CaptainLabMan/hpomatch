@@ -9,9 +9,9 @@
     {% if not data or not data.diseases %}
         <p>No disease data found for this gene.</p>
     {% else %}
-        <div class="shadow-sm border rounded-4 bg-white border overflow-hidden d-flex flex-column flex-grow-1" style="min-height: 0;">
+        <div class="shadow-sm border rounded-4 bg-white border overflow-hidden d-flex flex-column flex-grow-1" style="min-height: 0; --bs-bg-opacity: 0.9;"">
             <div class="table-responsive overflow-auto flex-grow-1" style="min-height: 0;">
-                <table class="table table-bordered text-center align-middle mb-0">
+                <table class="table table-bordered text-center align-middle mb-0" style="font-size: 0.75rem;">
                 <thead class="sticky-top table-light">
                     <tr>
                         <th scope="col">Symptom group</th>
@@ -70,12 +70,20 @@
                                     {% if group and group.terms %}
                                         <ul class="text-start ps-3 mb-0">
                                             {% for hpo_id, term in group.terms.items() %}
-                                                <li class="mb-1" title="{{ hpo_id }}">
-                                                    {% if term.excluded %}
-                                                        <strong>Not observed:</strong>
-                                                    {% endif %}
+                                                <li class="mb-1">
+                                                    <span
+                                                        class="symptom"
+                                                        tabindex="0"
+                                                        data-hpo-id="{{ hpo_id }}"
+                                                        data-references="{{ term.get('references', []) | tojson | forceescape }}"
+                                                        style="cursor: help;"
+                                                    >
+                                                        {% if term.excluded %}
+                                                            <strong>Not observed:</strong>
+                                                        {% endif %}
 
-                                                    {{ term.name }}{% if term.frequency %} ({{ term.frequency }}){% endif %}
+                                                        {{ term.name }}{% if term.frequency %} ({{ term.frequency }}){% endif %}
+                                                    </span>
                                                 </li>
                                             {% endfor %}
                                         </ul>
@@ -92,4 +100,8 @@
     </div>
     {% endif %}
 </main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', path='/js/gene.js') }}"></script>
 {% endblock %}

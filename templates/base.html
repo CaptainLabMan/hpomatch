@@ -9,8 +9,9 @@
     <link rel="stylesheet"
           href="{{ url_for('static', path='/vendor/bootstrap/bootstrap.min.css') }}">
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', path='/vendor/jstree/themes/default/style.min.css') }}">
+    <link rel="icon"
+      type="image/png"
+      href="{{ url_for('static', path='/images/favicon.png') }}">
 
     <style>
         .autoComplete_wrapper .list-group-item:hover,
@@ -19,14 +20,33 @@
             color: #212529;
             cursor: pointer;
         }
+        .table {
+            --bs-table-bg: transparent;
+        }
+        #exact-match:checked {
+            background-color: #d1e7de;
+        }
+    </style>
+
+    <style>
+        body {
+            background: url("{{ url_for('static', path='/images/background.svg') }}")
+                        center / cover no-repeat fixed;
+            min-height: 100vh;
+        }
     </style>
 </head>
 
 <body class="bg-body-secondary" class="vh-100">
-    <nav class="navbar bg-body-tertiary shadow-sm" style="height: 8vh">
-        <div class="container-fluid justify-content-center">
-            <a class="navbar-brand m-0" href="{{ url_for('index') }}">
-                <h1 class="m-0">PhenFind</h1>
+    <nav class="navbar bg-transparent" style="height: 8vh">
+        <div class="container-fluid justify-content-center h-100 p-0">
+            <a class="navbar-brand m-0 h-100 p-0" href="{{ url_for('index') }}">
+                <img
+                    src="{{ url_for('static', path='/images/logo.svg') }}"
+                    alt="PhenFind"
+                    class="h-100 d-block"
+                    style="width: auto;"
+                >
             </a>
 
             <form action="{{ url_for('gene_page') }}"
@@ -37,7 +57,7 @@
                 <input
                     id="gene-input"
                     name="gene"
-                    class="form-control border border-success-subtle focus-ring focus-ring-success"
+                    class="form-control bg-white border focus-ring focus-ring-success"
                     type="search"
                     placeholder="Search gene"
                     aria-label="Search gene"

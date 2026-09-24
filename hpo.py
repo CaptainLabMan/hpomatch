@@ -263,8 +263,16 @@ def build_gene_phenotypes_dict(
                     "name": term_name,
                     "frequency": None,
                     "excluded": row.qualifier == "NOT",
+                    "references": [],
                 },
             )
+
+            # Collect unique references from all annotations for this term.
+            for reference in str(row.reference).split(";"):
+                reference = reference.strip()
+
+                if reference and reference != "-" and reference not in term["references"]:
+                    term["references"].append(reference)
 
             # Preserve distinct frequencies from repeated annotations.
             # These values are displayed together, not combined statistically.
