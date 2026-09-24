@@ -4,7 +4,7 @@ from urllib.parse import urlsplit
 from urllib.request import urlretrieve
 
 
-def fetch_file(link: str, output_dir: str, filename: str = None) -> str:
+def fetch_file(link: str, output_dir: str, filename: str = None) -> Path:
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 

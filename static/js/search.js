@@ -161,7 +161,11 @@ async function updateMatches() {
 
     const mode = $(".select-search-in").val();
 
-    panels.text("Loading...");
+    panels.html(`
+        <div class="d-flex justify-content-center align-items-center h-100">
+            Loading...
+        </div>
+    `);
 
     try {
         const mode = $(".select-search-in").val();
