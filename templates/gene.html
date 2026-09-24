@@ -72,7 +72,7 @@
                                             {% for hpo_id, term in group.terms.items() %}
                                                 <li class="mb-1">
                                                     <span
-                                                        class="symptom"
+                                                        class="symptom{% if hpo_id in highlight_hpo_ids and not term.excluded %} matched-symptom{% endif %}"
                                                         tabindex="0"
                                                         data-hpo-id="{{ hpo_id }}"
                                                         data-references="{{ term.get('references', []) | tojson | forceescape }}"

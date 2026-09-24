@@ -4,21 +4,32 @@
 <main class="container-fluid py-1" style="height: 92vh;">
 
     <div class="row h-100">
-        <div class="col-8 h-100">
+        <div class="col-7 h-100">
             <div class="row h-50">
 
-                <div class="col-4 p-1 h-100">
+                <div class="col-5 p-1 h-100">
                     <div class="bg-white shadow-sm border rounded-4 h-100 p-1 d-flex flex-column" style="--bs-bg-opacity: 0.9;">
-                        <input
-                            id="search-input"
-                            class="form-control bg-success rounded-4 p-2 border border-success focus-ring focus-ring-success"
-                            style="--bs-bg-opacity: 0.1;"
-                            type="search"
-                            placeholder="Search terms"
-                            aria-label="Search terms"
-                        >
+                        <div class="input-group flex-nowrap">
+                            <input
+                                id="search-input"
+                                class="form-control bg-success rounded-start-4 p-2 border border-success focus-ring focus-ring-success"
+                                style="--bs-bg-opacity: 0.1;"
+                                type="search"
+                                placeholder="Search terms"
+                                aria-label="Search terms"
+                            >
 
-                        <div class="d-flex flex-nowrap align-items-center gap-2 flex-shrink-0 py-1">
+                            <select
+                                class="form-select select-search-in rounded-end-4 border border-success bg-success-subtle focus-ring focus-ring-success"
+                                style="flex: 0 0 130px;"
+                                aria-label="Search in"
+                            >
+                                <option value="disease" selected>In diseases</option>
+                                <option value="gene">In genes</option>
+                            </select>
+                        </div>
+
+                        <div class="d-flex flex-wrap align-items-center gap-2 flex-shrink-0 py-1">
                             <div class="form-check form-switch d-flex align-items-center gap-2 ps-0 mb-0">
                                 <input
                                     class="form-check-input fs-3 m-0 flex-shrink-0 border border-success"
@@ -50,6 +61,15 @@
                             </div>
                         </div>
 
+                        <button
+                            id="clear-terms"
+                            type="button"
+                            class="btn btn-sm bg-success-subtle border border-success rounded-4 align-self-end flex-shrink-0 my-1"
+                            style="width: 65px;"
+                        >
+                            Clear
+                        </button>
+
                         <div id="selected-terms"
                              class="overflow-auto"
                              style="flex: 1; min-height: 0;">
@@ -57,9 +77,9 @@
                     </div>
                 </div>
 
-                <div class="col-8 p-1 h-100">
+                <div class="col-7 p-1 h-100">
                     <div id="matching-genes"
-                         class="bg-white shadow-sm border rounded-4 h-100 p-2 overflow-auto" style="--bs-bg-opacity: 0.9;">
+                         class="bg-white shadow-sm border rounded-4 h-100 p-0 overflow-auto" style="--bs-bg-opacity: 0.9;">
                     </div>
                 </div>
 
@@ -67,14 +87,14 @@
 
             <div class="row h-50">
                 <div class="col-12 p-1 h-100">
-                    <div id="genes-match-stats" class="bg-white shadow-sm border rounded-4 h-100 p-2 overflow-auto" style="--bs-bg-opacity: 0.9;">
+                    <div id="genes-match-stats" class="bg-white shadow-sm border rounded-4 h-100 p-0 overflow-auto" style="--bs-bg-opacity: 0.9;">
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-4 p-1 h-100">
-            <div id="gene-match-summary" class="bg-white shadow-sm border rounded-4 h-100 p-2 overflow-auto" style="--bs-bg-opacity: 0.9;">
+        <div class="col-5 p-1 h-100">
+            <div id="gene-match-summary" class="bg-white shadow-sm border rounded-4 h-100 p-0 overflow-auto" style="--bs-bg-opacity: 0.9;">
             </div>
         </div>
     </div>

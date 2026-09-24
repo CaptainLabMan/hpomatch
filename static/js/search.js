@@ -89,7 +89,7 @@ async function initTermSearch() {
 
         resultsList: {
             maxResults: Infinity,
-            class: "list-unstyled position-absolute w-100 shadow mt-1 bg-white rounded-3",
+            class: "list-unstyled position-absolute top-100 start-0 w-100 shadow mt-1 bg-white rounded-3",
             element: list => {
                 list.style.cssText =
                     "max-height: 38vh; overflow-y: auto; z-index: 1050;";
@@ -137,7 +137,7 @@ async function initTermSearch() {
         }
     });
 
-    autocomplete.wrapper.classList.add("position-relative", "flex-shrink-0");
+    autocomplete.wrapper.classList.add("position-static", "flex-shrink-0");
 
     exact.addEventListener("change", () => autocomplete.start());
 }
@@ -153,21 +153,27 @@ let matchRequest = 0;
 async function updateMatches() {
     const requestId = ++matchRequest;
     const minimum = document.getElementById("min-matches");
-    if (!minimum.checkValidity()) return;
     const ids = getSelectedHpoIds();
     const panels = $("#matching-genes, #gene-match-summary, #genes-match-stats");
 
     panels.empty();
-    if (!ids.length) return;
+    if (!ids.length || !minimum.checkValidity()) return;
+
+    const mode = $(".select-search-in").val();
 
     panels.text("Loading...");
 
     try {
-        const response = await fetch(`/matches?min_matches=${minimum.valueAsNumber}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(ids)
-        });
+        const mode = $(".select-search-in").val();
+
+        const response = await fetch(
+            `/matches?min_matches=${minimum.valueAsNumber}&mode=${mode}`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(ids)
+            }
+        );
 
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
@@ -178,34 +184,107 @@ async function updateMatches() {
         // Ignore responses for an outdated selection.
         if (requestId !== matchRequest) return;
 
-        if (!data.genes.length) {
-            $("#matching-genes").text("Genes: 0");
-            $("#gene-match-summary, #genes-match-stats")
-                .text("No matching genes.");
-            return;
-        }
-
         $("#matching-genes").empty().append(
-            $("<h6>", {
+            $("<div>", {
+                class: "bg-success-subtle text-center fw-bold p-2 border-bottom sticky-top",
                 text: `Genes: ${data.genes.length}`
             }),
             $("<div>", {
+                class: "p-2",
                 text: data.genes.join(", ")
             })
         );
-        $("#gene-match-summary").html(data.summary_html);
-        $("#gene-match-summary tbody tr").each(function () {
-            const cell = $(this).children("td").first();
-            const gene = cell.text().trim();
 
-            cell.empty().append(
-                $("<a>", {
-                    href: `/gene?gene=${encodeURIComponent(gene)}`,
-                    text: gene,
-                    target: "_blank",
-                    rel: "noopener noreferrer"
-                })
-            );
+        if (!data.result_count) {
+            $("#gene-match-summary, #genes-match-stats")
+                .text("No matches found.");
+            return;
+        }
+
+        $("#gene-match-summary").html(data.summary_html);
+        const geneFilter = $("<input>", {
+            type: "search",
+            class: "form-control form-control-sm text-center rounded-4 border-success-subtle bg-success-subtle focus-ring focus-ring-success",
+            placeholder: "Genes",
+            "aria-label": "Filter by gene"
+        });
+
+        $("#gene-match-summary thead th").first().empty().append(geneFilter);
+
+        geneFilter.on("input", function () {
+            const query = this.value.trim().toLowerCase();
+
+            $("#gene-match-summary tbody tr").each(function () {
+                const genes = $(this)
+                    .children("td")
+                    .first()
+                    .text()
+                    .toLowerCase();
+
+                $(this).toggle(genes.includes(query));
+            });
+        });
+        if (mode === "disease") {
+            $("#gene-match-summary tbody tr").each(function () {
+                const cell = $(this).children("td").eq(1);
+                const text = cell.text();
+                const match = text.match(/\((OMIM|ORPHA):(\d+)\)$/);
+
+                if (!match) return;
+
+                const [suffix, database, number] = match;
+                const url = database === "OMIM"
+                    ? `https://omim.org/entry/${number}`
+                    : `https://www.orpha.net/en/disease/detail/${number}`;
+
+                cell.empty().append(
+                    document.createTextNode(text.slice(0, -suffix.length) + "("),
+                    $("<a>", {
+                        href: url,
+                        text: `${database}:${number}`,
+                        target: "_blank",
+                        rel: "noopener noreferrer"
+                    }),
+                    document.createTextNode(")")
+                );
+            });
+        }
+        $("#gene-match-summary tbody tr").each(function () {
+            const cells = $(this).children("td");
+            const cell = cells.first();
+            const text = cell.text().trim();
+
+            if (!text || text === "—") return;
+
+            const rowId = mode === "gene"
+                ? text
+                : cells.eq(1).text().trim().match(/\(([^()]+)\)$/)?.[1];
+
+            const matchedIds = data.matched_hpo_ids[rowId] || [];
+            const genes = text.split(",").map(gene => gene.trim());
+
+            cell.empty();
+
+            genes.forEach((gene, index) => {
+                if (index > 0) {
+                    cell.append(document.createTextNode(", "));
+                }
+
+                const params = new URLSearchParams({ gene });
+
+                matchedIds.forEach(id => {
+                    params.append("highlight", id);
+                });
+
+                cell.append(
+                    $("<a>", {
+                        href: `/gene?${params.toString()}`,
+                        text: gene,
+                        target: "_blank",
+                        rel: "noopener noreferrer"
+                    })
+                );
+            });
         });
         $("#genes-match-stats").html(data.stats_html);
 
@@ -218,3 +297,27 @@ async function updateMatches() {
 }
 
 $("#min-matches").on("input", updateMatches);
+
+
+$(".select-search-in").on("change", function () {
+    selectedTerms.clear();
+    $("#selected-terms").empty();
+
+    const input = document.getElementById("search-input");
+    input.value = "";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+
+    updateMatches();
+});
+
+
+$("#clear-terms").on("click", function () {
+    selectedTerms.clear();
+    $("#selected-terms").empty();
+
+    const input = document.getElementById("search-input");
+    input.value = "";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+
+    updateMatches();
+});

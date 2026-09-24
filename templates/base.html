@@ -9,32 +9,11 @@
     <link rel="stylesheet"
           href="{{ url_for('static', path='/vendor/bootstrap/bootstrap.min.css') }}">
 
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+
     <link rel="icon"
       type="image/png"
       href="{{ url_for('static', path='/images/favicon.png') }}">
-
-    <style>
-        .autoComplete_wrapper .list-group-item:hover,
-        .autoComplete_wrapper .list-group-item[aria-selected="true"] {
-            background-color: #e2e6ea;
-            color: #212529;
-            cursor: pointer;
-        }
-        .table {
-            --bs-table-bg: transparent;
-        }
-        #exact-match:checked {
-            background-color: #d1e7de;
-        }
-    </style>
-
-    <style>
-        body {
-            background: url("{{ url_for('static', path='/images/background.svg') }}")
-                        center / cover no-repeat fixed;
-            min-height: 100vh;
-        }
-    </style>
 </head>
 
 <body class="bg-body-secondary" class="vh-100">

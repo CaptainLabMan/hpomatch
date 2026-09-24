@@ -1,0 +1,95 @@
+.autoComplete_wrapper .list-group-item:hover,
+.autoComplete_wrapper .list-group-item[aria-selected="true"] {
+    background-color: #e2e6ea;
+    color: #212529;
+    cursor: pointer;
+}
+.table {
+    --bs-table-bg: transparent;
+}
+#exact-match:checked {
+    background-color: #d1e7de;
+}
+.input-group > .autoComplete_wrapper {
+    flex: 1;
+    min-width: 0;
+}
+
+.input-group > .autoComplete_wrapper > input {
+    width: 100%;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+#gene-match-summary thead,
+#genes-match-stats thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    --bs-table-bg: #d1e7dd;
+}
+
+.matched-symptom {
+    background-color: #d1e7dd;
+    color: #075a42;
+    border-radius: 4px;
+    padding: 2px 4px;
+    font-weight: 600;
+}
+
+#gene-match-summary table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+#gene-match-summary th,
+#gene-match-summary td {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+#gene-match-summary thead input {
+    font: inherit;
+    color: inherit;
+}
+
+#gene-match-summary thead input::placeholder {
+    color: inherit;
+    opacity: 1;
+}
+
+/* Tables columns wide */
+/* In genes: Gene | Matches | Matched terms */
+#gene-match-summary table:has(th:nth-child(3):last-child) th:nth-child(1) {
+    width: 20%;
+}
+
+#gene-match-summary table:has(th:nth-child(3):last-child) th:nth-child(2) {
+    width: 15%;
+}
+
+#gene-match-summary table:has(th:nth-child(3):last-child) th:nth-child(3) {
+    width: 65%;
+}
+
+/* In diseases: Gene | Disease | Matches | Matched terms */
+#gene-match-summary table:has(th:nth-child(4):last-child) th:nth-child(1) {
+    width: 15%;
+}
+
+#gene-match-summary table:has(th:nth-child(4):last-child) th:nth-child(2) {
+    width: 30%;
+}
+
+#gene-match-summary table:has(th:nth-child(4):last-child) th:nth-child(3) {
+    width: 12%;
+}
+
+#gene-match-summary table:has(th:nth-child(4):last-child) th:nth-child(4) {
+    width: 43%;
+}
+
+body {
+    background: url("../images/background.svg")
+                center / cover no-repeat fixed;
+    min-height: 100vh;
+}

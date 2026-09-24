@@ -15,20 +15,84 @@ def create_genes_x_phenotypes_matrix(phenotype_to_genes_df: pd.DataFrame) -> pd.
         )
 
 
-def match_genes_to_hpo_ids(
-        genes_x_phenotypes_matrix: pd.DataFrame,
-        hpo_ids: list[str]
+def create_diseases_x_phenotypes_matrix(
+    disease_annotations: pd.DataFrame,
 ) -> pd.DataFrame:
-    '''
-    Возвращает DF:
-    Гены x Совпавшие терминины (hpo_id)
-    '''
-    
-    matches = genes_x_phenotypes_matrix.reindex(
+    """Build a disease x HPO ID matrix from annotations, excluding NOT."""
+
+    annotations = disease_annotations.loc[
+        disease_annotations["qualifier"].fillna("").ne("NOT")
+    ]
+
+    return (
+        pd.crosstab(
+            annotations["database_id"],
+            annotations["hpo_id"],
+        )
+        .gt(0)
+        .astype("uint8")
+    )
+
+
+def match_hpo_ids(
+    matrix: pd.DataFrame,
+    hpo_ids: list[str],
+    min_matches: int = 1,
+) -> pd.DataFrame:
+    """Return rows matching at least min_matches unique HPO IDs."""
+
+    matches = matrix.reindex(
         columns=list(dict.fromkeys(hpo_ids)),
         fill_value=0,
+    )
+
+    return matches.loc[matches.sum(axis=1) >= min_matches]
+
+
+def add_disease_details(
+    summary: pd.DataFrame,
+    disease_names: pd.DataFrame,
+    disease_genes: pd.DataFrame,
+) -> pd.DataFrame:
+    """Add disease names and associated genes to the match summary."""
+
+    summary = (
+        summary
+        .merge(disease_names, on="database_id", how="left")
+        .merge(disease_genes, on="database_id", how="left")
+    )
+
+    summary["disease"] = (
+        summary["disease_name"].fillna("Unknown disease")
+        + " (" + summary["database_id"] + ")"
+    )
+
+    return summary[[
+        "gene_symbol", "disease", "matches_count", "matched_terms"
+    ]]
+
+
+def group_disease_matches(summary: pd.DataFrame) -> pd.DataFrame:
+    """Combine genes into one row per disease and match profile."""
+
+    grouped = (
+        summary
+        .groupby(
+            ["disease", "matches_count", "matched_terms"],
+            as_index=False,
+            sort=False,
         )
-    return matches[matches.ne(0).any(axis=1)]
+        .agg(
+            gene_symbol=(
+                "gene_symbol",
+                lambda genes: ", ".join(sorted(set(genes.dropna()))) or "—",
+            )
+        )
+    )
+
+    return grouped[[
+        "gene_symbol", "disease", "matches_count", "matched_terms"
+    ]]
 
 
 def count_matches(genes_x_phenotypes_matrix_matches: pd.DataFrame) -> pd.DataFrame:
@@ -337,29 +401,34 @@ def build_gene_phenotypes_dict(
 # ==================================================================================================================================
 
 def prepare_hpo_search_terms(
-    phenotype_to_genes_df: pd.DataFrame,
+    hpo_ids: list[str],
     hp: dict,
 ) -> list[dict]:
+    """Prepare searchable names and synonyms for the provided HPO IDs."""
 
-    synonyms = {
-        node["id"].rsplit("/", 1)[-1].replace("_", ":"): [
-            item["val"]
-            for item in node.get("meta", {}).get("synonyms", [])
-        ]
+    nodes = {
+        node["id"].rsplit("/", 1)[-1].replace("_", ":"): node
         for node in hp["graphs"][0]["nodes"]
     }
 
-    terms = (
-        phenotype_to_genes_df[["hpo_id", "hpo_name"]]
-        .drop_duplicates("hpo_id")
-    )
-
     result = []
 
-    for hpo_id, hpo_name in terms.itertuples(index=False, name=None):
-        names = [hpo_name, *synonyms.get(hpo_id, [])]
+    for hpo_id in dict.fromkeys(hpo_ids):
+        if not hpo_id or hpo_id in {
+            "HP:0000001",  # All
+            "HP:0000005",  # Mode of inheritance
+        }:
+            continue
 
-        for name in dict.fromkeys(names):
+        node = nodes.get(hpo_id, {})
+        hpo_name = node.get("lbl", hpo_id)
+
+        synonyms = [
+            item["val"]
+            for item in node.get("meta", {}).get("synonyms", [])
+        ]
+
+        for name in dict.fromkeys([hpo_name, *synonyms]):
             result.append({
                 "hpo_id": hpo_id,
                 "hpo_name": hpo_name,

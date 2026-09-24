@@ -1,3 +1,4 @@
+from typing import Literal
 from pathlib import Path
 import json
 import pandas as pd
@@ -8,7 +9,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from hpo import (
-    match_genes_to_hpo_ids,
+    match_hpo_ids,
+    add_disease_details,
+    group_disease_matches,
     get_gene_match_summary,
     get_genes_stats_by_count_matches,
 )
@@ -20,15 +23,38 @@ BASE_DIR = Path(__file__).resolve().parent
 # ==================================================================================================================================
 
 # ==================================================================================================================================
-matrix = pd.read_pickle(
-    BASE_DIR / "static/data/genes_x_phenotypes_matrix.pkl"
+genes_x_phenotypes_matrix = pd.read_pickle(
+    BASE_DIR / "static/data/genes_x_phenotypes_matrix.pkl.gz"
 )
 
-phenotype_names = pd.read_csv(
-    BASE_DIR / "data/hpo/phenotype_to_genes.txt",
-    sep="\t",
-    usecols=["hpo_id", "hpo_name"],
-).drop_duplicates("hpo_id")
+diseases_x_phenotypes_matrix = pd.read_pickle(
+    BASE_DIR / "static/data/diseases_x_phenotypes_matrix.pkl.gz"
+)
+
+with (BASE_DIR / "data/hpo/hp.json").open(encoding="utf-8") as file:
+    hp = json.load(file)
+
+phenotype_names = pd.DataFrame([
+    {
+        "hpo_id": node["id"].rsplit("/", 1)[-1].replace("_", ":"),
+        "hpo_name": node["lbl"],
+    }
+    for node in hp["graphs"][0]["nodes"]
+    if "lbl" in node
+])
+del hp
+
+
+disease_names = pd.read_csv(
+    BASE_DIR / "data/hpo/phenotype.hpoa",
+    sep="\t", comment="#", usecols=["database_id", "disease_name"],
+).drop_duplicates("database_id")
+
+disease_genes = pd.read_csv(
+    BASE_DIR / "data/hpo/genes_to_disease.txt",
+    sep="\t", usecols=["disease_id", "gene_symbol"],
+).rename(columns={"disease_id": "database_id"}).dropna().drop_duplicates()
+disease_genes = disease_genes.loc[disease_genes["gene_symbol"].ne("-")]
 
 # ==================================================================================================================================
 
@@ -91,38 +117,54 @@ def index(request: Request):
 def get_matches(
     hpo_ids: list[str] = Body(...),
     min_matches: int = Query(1, ge=1),
+    mode: Literal["gene", "disease"] = "gene",
 ):
-    matches = match_genes_to_hpo_ids(matrix, hpo_ids)
+    if mode == "gene":
+        matrix = genes_x_phenotypes_matrix
+    else:
+        matrix = diseases_x_phenotypes_matrix
 
-    matches = matches.loc[
-        matches.sum(axis=1) >= min_matches
-    ]
+    matches = match_hpo_ids(matrix, hpo_ids, min_matches)
 
     summary = get_gene_match_summary(matches, phenotype_names)
+    if mode == "disease":
+        summary = add_disease_details(
+            summary,
+            disease_names,
+            disease_genes,
+        )
     summary = summary.sort_values("matches_count", ascending=False)
 
-    stats = get_genes_stats_by_count_matches(summary)
+    gene_counts = (
+        summary[["gene_symbol", "matches_count"]]
+        .dropna().drop_duplicates()
+    )
+
+    stats = get_genes_stats_by_count_matches(gene_counts)
+
+    genes = sorted(gene_counts["gene_symbol"].unique().tolist())
+
+    if mode == "disease":
+        summary = group_disease_matches(summary)
 
     table_options = {
-        "index": False,
-        "border": 0,
+        "index": False, "border": 0,
         "classes": "table table-sm table-striped text-center align-middle",
         "justify": "center",
     }
-
     return {
-        "genes": matches.index.tolist(),
-
+        "result_count": len(matches),
+        "matched_hpo_ids": {
+            str(entity): matches.columns[values == 1].tolist()
+            for entity, values in zip(matches.index, matches.to_numpy())
+        },
+        "genes": genes,
         "summary_html": summary.rename(columns={
-            "gene_symbol": "Gene",
-            "matches_count": "Matches",
-            "matched_terms": "Matched terms",
+            "gene_symbol": "Gene", "disease": "Disease",
+            "matches_count": "Matches", "matched_terms": "Matched terms",
         }).to_html(**table_options),
-
         "stats_html": stats.rename(columns={
-            "matches_count": "Matches",
-            "genes_count": "Gene count",
-            "genes": "Genes",
+            "matches_count": "Matches", "genes_count": "Gene count", "genes": "Genes",
         }).to_html(**table_options),
     }
 
@@ -138,7 +180,11 @@ def gene_api(gene: str):
 
 
 @app.get("/gene", response_class=HTMLResponse)
-def gene_page(request: Request, gene: str):
+def gene_page(
+    request: Request,
+    gene: str,
+    highlight: list[str] = Query(default=[]),
+):
     data = get_gene_data(gene)
 
     return templates.TemplateResponse(
@@ -147,6 +193,7 @@ def gene_page(request: Request, gene: str):
         context={
             "gene": data["gene"] if data else gene.strip().upper(),
             "data": data,
+            "highlight_hpo_ids": set(highlight),
         },
         status_code=404 if data is None else 200,
     )
