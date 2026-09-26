@@ -186,13 +186,30 @@ async function updateMatches() {
         const data = await response.json();
 
         // Ignore responses for an outdated selection.
-        if (requestId !== matchRequest) return;
-
         $("#matching-genes").empty().append(
             $("<div>", {
-                class: "bg-success-subtle text-center fw-bold p-2 border-bottom sticky-top",
-                text: `Genes: ${data.genes.length}`
-            }),
+                class: "position-relative text-center fw-bold p-2 border-bottom sticky-top",
+                style: "background-color: #d1e7dd; color: #075a42;"
+            }).append(
+                $("<span>", {
+                    text: `Genes: ${data.genes.length}`
+                }),
+                $("<button>", {
+                    type: "button",
+                    class: "btn btn-sm bg-transparent border border-success rounded-4 position-absolute top-50 end-0 translate-middle-y me-2",
+                    style: "width: 65px;",
+                    text: "Copy",
+                    disabled: !data.genes.length
+                }).on("click", async function () {
+                    try {
+                        await navigator.clipboard.writeText(data.genes.join(", "));
+                        $(this).text("Copied");
+                        setTimeout(() => $(this).text("Copy"), 1500);
+                    } catch (error) {
+                        alert("Could not copy genes.");
+                    }
+                })
+            ),
             $("<div>", {
                 class: "p-2",
                 text: data.genes.join(", ")
