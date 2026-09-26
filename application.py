@@ -160,7 +160,7 @@ def get_matches(
         },
         "genes": genes,
         "summary_html": summary.rename(columns={
-            "gene_symbol": "Gene", "disease": "Disease",
+            "gene_symbol": "Genes", "disease": "Disease",
             "matches_count": "Matches", "matched_terms": "Matched terms",
         }).to_html(**table_options),
         "stats_html": stats.rename(columns={

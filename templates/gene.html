@@ -51,10 +51,27 @@
 
                         {% for disease in data.diseases.values() %}
                             <td>
-                                {{ disease.inheritance
-                                   if disease.inheritance
-                                   and disease.inheritance != 'Нет данных'
-                                   else 'No data' }}
+                                {% if disease.inheritance and disease.inheritance != 'Нет данных' %}
+                                    {% for item in disease.inheritance.split(';') %}
+                                        {% set label = item.strip() %}
+                                        {% set name = label.lower() %}
+                                        {% set color = '' %}
+
+                                        {% if 'autosomal recessive' in name %}
+                                            {% set color = 'var(--bs-green)' %}
+                                        {% elif 'autosomal dominant' in name %}
+                                            {% set color = 'var(--bs-red)' %}
+                                        {% elif 'x-linked' in name %}
+                                            {% set color = 'var(--bs-orange)' %}
+                                        {% elif 'somatic' in name %}
+                                            {% set color = 'var(--bs-purple)' %}
+                                        {% endif %}
+
+                                        <span{% if color %} style="color: {{ color }};"{% endif %}>{{ label }}</span>{% if not loop.last %}; {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    No data
+                                {% endif %}
                             </td>
                         {% endfor %}
                     </tr>
