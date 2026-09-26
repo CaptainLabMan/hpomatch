@@ -188,7 +188,7 @@ async function updateMatches() {
         // Ignore responses for an outdated selection.
         $("#matching-genes").empty().append(
             $("<div>", {
-                class: "position-relative text-center fw-bold p-2 border-bottom sticky-top",
+                class: "sticky-top text-center fw-bold p-2 border-bottom sticky-top",
                 style: "background-color: #d1e7dd; color: #075a42;"
             }).append(
                 $("<span>", {
