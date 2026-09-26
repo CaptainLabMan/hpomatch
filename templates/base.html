@@ -33,16 +33,33 @@
                 class="position-absolute end-0 me-3"
                 style="width: 25%; max-width: 250px;">
 
-                <input
-                    id="gene-input"
-                    name="gene"
-                    class="form-control bg-white border focus-ring focus-ring-success"
-                    type="search"
-                    placeholder="Search gene"
-                    aria-label="Search gene"
-                    value="{{ gene | default('') }}"
-                    required
-                >
+                <div class="position-relative">
+                    <input
+                        id="gene-input"
+                        name="gene"
+                        class="form-control bg-white border rounded-5 focus-ring focus-ring-success"
+                        style="padding-right: 3rem;"
+                        type="search"
+                        placeholder="Search gene"
+                        aria-label="Search gene"
+                        value="{{ gene | default('') }}"
+                        required
+                    >
+
+                    <button
+                        type="submit"
+                        class="btn border-0 rounded-circle position-absolute top-50 end-0 translate-middle-y me-1 text-success d-flex align-items-center justify-content-center"
+                        aria-label="Search gene"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            width="16" height="16"
+                            fill="currentColor"
+                            viewBox="0 0 16 16"
+                            aria-hidden="true">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85zm-5.242 1.15a5 5 0 1 1 0-10 5 5 0 0 1 0 10"/>
+                        </svg>
+                    </button>
+                </div>
             </form>
         </div>
     </nav>

@@ -200,15 +200,19 @@ async function updateMatches() {
         );
 
         if (!data.result_count) {
-            $("#gene-match-summary, #genes-match-stats")
-                .text("No matches found.");
+            $("#gene-match-summary, #genes-match-stats").html(`
+                <div class="d-flex justify-content-center align-items-center h-100">
+                    No matches found.
+                </div>
+            `);
+
             return;
         }
 
         $("#gene-match-summary").html(data.summary_html);
         const geneFilter = $("<input>", {
             type: "search",
-            class: "form-control form-control-sm text-center rounded-4 border-success-subtle bg-success-subtle focus-ring focus-ring-success",
+            class: "form-control form-control-sm text-center bg-transparent rounded-4 border border-white focus-ring focus-ring-success",
             placeholder: "Genes",
             "aria-label": "Filter by gene"
         });
@@ -303,16 +307,7 @@ async function updateMatches() {
 $("#min-matches").on("input", updateMatches);
 
 
-$(".select-search-in").on("change", function () {
-    selectedTerms.clear();
-    $("#selected-terms").empty();
-
-    const input = document.getElementById("search-input");
-    input.value = "";
-    input.dispatchEvent(new Event("input", { bubbles: true }));
-
-    updateMatches();
-});
+$(".select-search-in").on("change", updateMatches);
 
 
 $("#clear-terms").on("click", function () {
@@ -324,4 +319,21 @@ $("#clear-terms").on("click", function () {
     input.dispatchEvent(new Event("input", { bubbles: true }));
 
     updateMatches();
+});
+
+
+$("#copy-terms").on("click", async function () {
+    const text = [...selectedTerms.values()].join("; ");
+
+    if (!text) return;
+
+    try {
+        await navigator.clipboard.writeText(text);
+
+        $(this).text("Copied");
+        setTimeout(() => $(this).text("Copy"), 1500);
+    } catch (error) {
+        console.error(error);
+        alert("Could not copy terms.");
+    }
 });

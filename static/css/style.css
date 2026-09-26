@@ -81,15 +81,18 @@
 }
 
 #gene-match-summary table:has(th:nth-child(4):last-child) th:nth-child(3) {
-    width: 12%;
+    width: 13%;
 }
 
 #gene-match-summary table:has(th:nth-child(4):last-child) th:nth-child(4) {
-    width: 43%;
+    width: 42%;
 }
 
 body {
-    background: url("../images/background.svg")
-                center / cover no-repeat fixed;
+    background-image: url("../images/background.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     min-height: 100vh;
 }
