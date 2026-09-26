@@ -243,7 +243,7 @@ async function updateMatches() {
 
         const searchInput = $("<input>", {
             type: "search",
-            class: "form-control bg-transparent form-control-sm border border-success rounded-4 focus-ring focus-ring-success",
+            class: "form-control bg-white form-control-sm border border-success rounded-4 focus-ring focus-ring-success",
             placeholder: "Search summary",
             "aria-label": "Search summary"
         });
