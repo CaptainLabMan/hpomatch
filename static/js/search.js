@@ -229,6 +229,18 @@ async function updateMatches() {
         $("#gene-match-summary").html(data.summary_html);
         const summaryTable = $("#gene-match-summary table");
 
+        const widths = mode === "gene"
+            ? ["20%", "15%", "65%"]
+            : ["29%", "29%", "13%", "29%"];
+
+        const colgroup = $("<colgroup>");
+
+        widths.forEach(width => {
+            $("<col>").css("width", width).appendTo(colgroup);
+        });
+
+        summaryTable.prepend(colgroup);
+
         const searchInput = $("<input>", {
             type: "search",
             class: "form-control bg-transparent form-control-sm border border-success rounded-4 focus-ring focus-ring-success",

@@ -57,36 +57,7 @@
     opacity: 1;
 }
 
-/* Tables columns wide */
-/* In genes: Gene | Matches | Matched terms */
-#gene-match-summary table:has(th:nth-child(3):last-child) th:nth-child(1) {
-    width: 20%;
-}
 
-#gene-match-summary table:has(th:nth-child(3):last-child) th:nth-child(2) {
-    width: 15%;
-}
-
-#gene-match-summary table:has(th:nth-child(3):last-child) th:nth-child(3) {
-    width: 65%;
-}
-
-/* In diseases: Gene | Disease | Matches | Matched terms */
-#gene-match-summary table:has(th:nth-child(4):last-child) th:nth-child(1) {
-    width: 15%;
-}
-
-#gene-match-summary table:has(th:nth-child(4):last-child) th:nth-child(2) {
-    width: 30%;
-}
-
-#gene-match-summary table:has(th:nth-child(4):last-child) th:nth-child(3) {
-    width: 13%;
-}
-
-#gene-match-summary table:has(th:nth-child(4):last-child) th:nth-child(4) {
-    width: 42%;
-}
 
 body {
     background-image: url("../images/background.png");
