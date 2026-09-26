@@ -196,7 +196,7 @@ async function updateMatches() {
                 }),
                 $("<button>", {
                     type: "button",
-                    class: "btn btn-sm bg-transparent border border-success rounded-4 position-absolute top-50 end-0 translate-middle-y me-2",
+                    class: "btn btn-sm bg-transparent border border-success rounded-4 position-absolute top-50 end-0 translate-middle-y me-1",
                     style: "width: 65px;",
                     text: "Copy",
                     disabled: !data.genes.length
@@ -227,28 +227,36 @@ async function updateMatches() {
         }
 
         $("#gene-match-summary").html(data.summary_html);
-        const geneFilter = $("<input>", {
+        const summaryTable = $("#gene-match-summary table");
+
+        const searchInput = $("<input>", {
             type: "search",
-            class: "form-control form-control-sm text-center bg-transparent rounded-4 border border-white focus-ring focus-ring-success",
-            placeholder: "Genes",
-            "aria-label": "Filter by gene"
+            class: "form-control bg-transparent form-control-sm border border-success rounded-4 focus-ring focus-ring-success",
+            placeholder: "Search summary",
+            "aria-label": "Search summary"
         });
 
-        $("#gene-match-summary thead th").first().empty().append(geneFilter);
+        summaryTable.find("thead").prepend(
+            $("<tr>").append(
+                $("<th>", {
+                    colspan: summaryTable.find("thead tr").first().children().length,
+                    class: "p-1"
+                }).append(searchInput)
+            )
+        );
 
-        geneFilter.on("input", function () {
+        searchInput.on("input", function () {
             const query = this.value.trim().toLowerCase();
 
-            $("#gene-match-summary tbody tr").each(function () {
-                const genes = $(this)
-                    .children("td")
-                    .first()
-                    .text()
-                    .toLowerCase();
+            summaryTable.find("tbody tr").each(function () {
+                const text = $(this).children("td").map(function () {
+                    return $(this).text();
+                }).get().join(" ").toLowerCase();
 
-                $(this).toggle(genes.includes(query));
+                $(this).toggle(text.includes(query));
             });
         });
+
         if (mode === "disease") {
             $("#gene-match-summary tbody tr").each(function () {
                 const cell = $(this).children("td").eq(1);

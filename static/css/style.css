@@ -96,3 +96,12 @@ body {
     background-attachment: fixed;
     min-height: 100vh;
 }
+
+#gene-match-summary thead input {
+    color: #000;
+}
+
+#gene-match-summary thead input::placeholder {
+    color: var(--bs-secondary);
+    opacity: 1;
+}
